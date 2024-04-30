@@ -1,4 +1,4 @@
-//code pour demander confirmation à l'utilisateur 
+//code pour demander confirmation à l'utilisateur lors de la deconnection 
 function togleDisconnect()
 {
 button = document.getElementById('disconnect');
