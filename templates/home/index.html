@@ -1,0 +1,12 @@
+{%extends 'base.html'%}
+{% block title %} acceuil {% endblock %}
+
+{% block content %}
+{%if( session['nom_utilisateur'] )%}
+<h1 class="m-3">Bonjour {{session['nom_utilisateur']}}</h1>
+<p class="m-3">Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quae expedita vitae maiores dolorem quod! Culpa tenetur voluptatem facilis aliquid? Sequi reiciendis nemo perspiciatis quis necessitatibus aliquid asperiores laudantium debitis.</p>
+
+{%else%}
+<h1 class="m-3">Bonjour invité </h1>
+{% endif%}
+{% endblock %}
