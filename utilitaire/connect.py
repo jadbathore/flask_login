@@ -9,6 +9,7 @@ def connect_func():
         password="root",
         unix_socket = '/Applications/MAMP/tmp/mysql/mysql.sock',
     )
-    except connector.errors as err:
-        print(f"une erreur est survenu : {err}")
-    return connection
+        return connection
+    except Exception :
+        raise Exception('connection à la base de donné a echoué')
+    

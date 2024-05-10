@@ -27,20 +27,19 @@ def index():
 # - si l'utilisateur essait trop de fois de s'inscrit depuis le login il est envoyer vers signin 
 # - si l'utilisateur utilise un mail deja dans la base de donnée depuis le signin il est renvoyer vers le login
 @app.route('/login', methods=['POST','GET'])
-def login():   
+def login():  
     if "compteur" not in session:
         session['compteur'] = 0
-        print(session['compteur'])
-    if(request.method == "POST"):
-        connect = Uconn.connect_func()
-        cursor = connect.cursor()
+    if(request.method == "POST"):  
         data = request.form
         mail = data.get("email")
         mdp = data.get("password")
         sql = "SELECT email,password FROM users WHERE email= %s"
-        cursor.execute(sql,(mail,))
-        result = cursor.fetchone()
         try:
+            connect = Uconn.connect_func()
+            cursor = connect.cursor()
+            cursor.execute(sql,(mail,))
+            result = cursor.fetchone()
             if(session['compteur'] and session['compteur'] >= 3):
                 erreur = Uerr.Error("êtes vous sur d'avoir un indefiant")
                 raise erreur
@@ -83,51 +82,51 @@ def login():
 
 @app.route('/signin',methods=['POST','GET'])
 def signin():
-        if(request.method == "POST"):
-            connect = Uconn.connect_func()
-            cursor = connect.cursor()
-            data = request.form
-            mail = data.get('email')
-            password = data.get('password')
-            sub = data.get('sub')
-            if(sub == 'Envoyer'):
-                try:
-                    if(mail != '' and password != ''):
-                            if(mail.count("@") != 0):
-                                if(len(password) >= 20 or len(mail) >= 20):
-                                    raise Exception("le mots de passe ou l'email est trop long")
+    if(request.method == "POST"):
+        data = request.form
+        mail = data.get('email')
+        password = data.get('password')
+        sub = data.get('sub')
+        if(sub == 'Envoyer'):
+            try:
+                connect = Uconn.connect_func()
+                cursor = connect.cursor()
+                if(mail != '' and password != ''):
+                        if(mail.count("@") != 0):
+                            if(len(password) >= 20 or len(mail) >= 20):
+                                raise Exception("le mots de passe ou l'email est trop long")
+                            else:
+                                if(Uemail.test_mail(mail) == True):
+                                    error = Uerr.Error("Email deja utilisé")
+                                    raise error
                                 else:
-                                    if(Uemail.test_mail(mail) == True):
-                                        error = Uerr.Error("Email deja utilisé")
-                                        raise error
-                                    else:
-                                        strippassword = password.strip()
-                                        stripemail = mail.strip()
-                                        encode_password = strippassword.encode('utf-8')
-                                        salt = bcrypt.gensalt()
-                                        crypted = bcrypt.hashpw(encode_password,salt=salt)
-                                        data = (stripemail,crypted)
-                                        sql = "INSERT INTO users (email,password) VALUES (%s,%s)"
-                                        cursor.execute(sql,data)
-                                        connect.commit()
-                                        session['nom_utilisateur'] = stripemail
-                                        return redirect(url_for('index'))
-                            else :
-                                raise Exception("veuillez renseignez un email valide")
-                    else:
-                        raise Exception("veuillez renseigner votre mail et le mots de passe que vous souhaiter enregistré")
-                except Exception as err:
-                    message = f"{err} ,vous ne pouvez pas vous inscrire"
-                    return render_template('sign/signup.html',message = message) 
-                except Uerr.Error:
-                    message = error.__get__()
-                    return redirect(url_for('login',messageErr_sign = message,mail = mail))
-        else:
-            errorCheck = request.args.get("messageErr_login")
-            if(errorCheck):
-                emailErr_login = request.args.get("mail")
-                return render_template("sign/signup.html",messageErr_login = errorCheck,mail = emailErr_login)
-        return render_template('sign/signup.html')
+                                    strippassword = password.strip()
+                                    stripemail = mail.strip()
+                                    encode_password = strippassword.encode('utf-8')
+                                    salt = bcrypt.gensalt()
+                                    crypted = bcrypt.hashpw(encode_password,salt=salt)
+                                    data = (stripemail,crypted)
+                                    sql = "INSERT INTO users (email,password) VALUES (%s,%s)"
+                                    cursor.execute(sql,data)
+                                    connect.commit()
+                                    session['nom_utilisateur'] = stripemail
+                                    return redirect(url_for('index'))
+                        else :
+                            raise Exception("veuillez renseignez un email valide")
+                else:
+                    raise Exception("veuillez renseigner votre mail et le mots de passe que vous souhaiter enregistré")
+            except Exception as err:
+                message = f"{err} ,vous ne pouvez pas vous inscrire"
+                return render_template('sign/signup.html',message = message) 
+            except Uerr.Error:
+                message = error.__get__()
+                return redirect(url_for('login',messageErr_sign = message,mail = mail))
+    else:
+        errorCheck = request.args.get("messageErr_login")
+        if(errorCheck):
+            emailErr_login = request.args.get("mail")
+            return render_template("sign/signup.html",messageErr_login = errorCheck,mail = emailErr_login,message=message)
+    return render_template('sign/signup.html')
 
 @app.route('/logout')
 def logout():
